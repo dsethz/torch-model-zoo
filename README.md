@@ -5,21 +5,12 @@
 [![Python Version](https://img.shields.io/pypi/pyversions/torch-model-zoo.svg?color=green)](https://python.org)
 [![tests](https://github.com/dsethz/torch-model-zoo/workflows/tests/badge.svg)](https://github.com/dsethz/torch-model-zoo/actions)
 [![codecov](https://codecov.io/gh/dsethz/torch-model-zoo/branch/main/graph/badge.svg)](https://codecov.io/gh/dsethz/torch-model-zoo)
-[![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/torch-model-zoo)](https://napari-hub.org/plugins/torch-model-zoo)
 
-A collection of torch models.
+A collection of torch models including U-Net, and Visual Transformer.
 
 ----------------------------------
 
-This [napari] plugin was generated with [Cookiecutter] using [@napari]'s [cookiecutter-napari-plugin] template.
-
-<!--
-Don't miss the full getting started guide to set up your new package:
-https://github.com/napari/cookiecutter-napari-plugin#getting-started
-
-and review the napari docs for plugin developers:
-https://napari.org/stable/plugins/index.html
--->
+This repository was generated with [Cookiecutter] using [@napari]'s [cookiecutter-napari-plugin] template.
 
 ## Installation
 
@@ -48,7 +39,6 @@ Distributed under the terms of the [BSD-3] license,
 
 If you encounter any problems, please [file an issue] along with a detailed description.
 
-[napari]: https://github.com/napari/napari
 [Cookiecutter]: https://github.com/audreyr/cookiecutter
 [@napari]: https://github.com/napari
 [MIT]: http://opensource.org/licenses/MIT
@@ -61,7 +51,6 @@ If you encounter any problems, please [file an issue] along with a detailed desc
 
 [file an issue]: https://github.com/dsethz/torch-model-zoo/issues
 
-[napari]: https://github.com/napari/napari
 [tox]: https://tox.readthedocs.io/en/latest/
 [pip]: https://pypi.org/project/pip/
 [PyPI]: https://pypi.org/

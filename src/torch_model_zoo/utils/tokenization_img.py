@@ -6,51 +6,70 @@
 # PyTorch Version:      2.3.0                                                                                         #
 # PyTorch Lightning Version: 1.5.9                                                                                    #
 #######################################################################################################################
+from typing import Tuple
+
+import torch
+from torch import nn
 
 
-# class DoubleConv(nn.Module):
-#     """
-#     This class does (convolution => [BN] => ReLU) * 2.
-#     """
-#
-#     def __init__(self, in_channels, out_channels, mid_channels=None):
-#         """
-#         Constructor.
-#
-#
-#         Parameter
-#         ---------
-#
-#         in_channels: int
-#             Input filters.
-#
-#         out_channels: int
-#             Output filters.
-#
-#         mid_channels: int
-#             intermediate filters.
-#
-#
-#         Return
-#         ------
-#
-#         -
-#         """
-#         super().__init__()
-#
-#         if mid_channels is None:
-#             mid_channels = out_channels
-#
-#         self.double_conv = nn.Sequential(
-#             nn.Conv2d(in_channels, mid_channels, kernel_size=3, padding=1),
-#             nn.BatchNorm2d(mid_channels),
-#             nn.LeakyReLU(negative_slope=slope, inplace=True),
-#             nn.Conv2d(mid_channels, out_channels, kernel_size=3, padding=1),
-#             nn.BatchNorm2d(out_channels),
-#             nn.LeakyReLU(inplace=True),
-#         )
-#
-#         self.double_conv.apply(init_weights)
-#
-#     def forward(self, x):
-#         return self.double_conv(x)
+class ImgTokenizer(nn.Module):
+    """
+    This class tokenizes images.
+    """
+
+    def __init__(
+        self,
+        size_img: Tuple[int, int, int] = (1, 1024, 1024),
+        size_patch: int = 32,
+        len_token: int = 768,
+    ):
+        """
+        Constructor.
+
+
+        Parameter
+        ---------
+
+        size_img: Tuple[int, int, int]
+            Shape of input images (C, H, W).
+
+        size_patch: int
+            Height and width of patches.
+
+        len_token: int
+            Final token length.
+
+
+        Return
+        ------
+
+        -
+        """
+        super().__init__()
+
+        # get user input
+        C, H, W = size_img
+
+        assert (
+            H % size_patch == 0
+        ), f"Height {H} is not divisible by size_patch {size_patch}."
+        assert (
+            W % size_patch == 0
+        ), f"Width {W} is not divisible by size_patch {size_patch}."
+
+        self.size_img = size_img
+        self.size_patch = size_patch
+        self.len_token = len_token
+        self.num_tokens = (H / size_patch) * (W / size_patch)
+
+        # define layers
+        self.split = nn.Unfold(
+            kernel_size=size_patch, stride=size_patch, padding=0
+        )
+        self.project = nn.Linear(self.size_patch**2 * C, self.len_token)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.split(x).transpose(2, 1)
+        x = self.project(x)
+
+        return x
