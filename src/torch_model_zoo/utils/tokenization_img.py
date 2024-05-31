@@ -26,24 +26,18 @@ class ImgTokenizer(nn.Module):
         """
         Constructor.
 
-
-        Parameter
-        ---------
-
+        Parameters
+        ----------
         size_img: Tuple[int, int, int]
             Shape of input images (C, H, W).
-
         size_patch: int
             Height and width of patches.
-
         len_token: int
             Final token length.
 
-
-        Return
-        ------
-
-        -
+        Returns
+        -------
+        None
         """
         super().__init__()
 
