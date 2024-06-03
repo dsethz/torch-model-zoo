@@ -4,7 +4,7 @@
 [![PyPI](https://img.shields.io/pypi/v/torch-model-zoo.svg?color=green)](https://pypi.org/project/torch-model-zoo)
 [![Python Version](https://img.shields.io/pypi/pyversions/torch-model-zoo.svg?color=green)](https://python.org)
 [![tests](https://github.com/dsethz/torch-model-zoo/workflows/tests/badge.svg)](https://github.com/dsethz/torch-model-zoo/actions)
-[![codecov](https://codecov.io/gh/dsethz/torch-model-zoo/branch/main/graph/badge.svg)](https://codecov.io/gh/dsethz/torch-model-zoo)
+[![codecov](https://codecov.io/gh/dsethz/torch-model-zoo/branch/main/graph/badge.svg?token=28DKUV51EC)](https://codecov.io/gh/dsethz/torch-model-zoo)
 
 A collection of torch models including U-Net, and Visual Transformer.
 
