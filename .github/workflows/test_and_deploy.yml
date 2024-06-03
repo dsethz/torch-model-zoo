@@ -63,6 +63,9 @@ jobs:
         run: |
           pip install torch==2.3.0
 
+      - name: Verify torch installation
+        run: python -c "import torch; print(torch.__version__)"
+
       # this runs the platform-specific tests declared in tox.ini
       - name: Test with tox
         uses: aganders3/headless-gui@v1
