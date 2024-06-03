@@ -49,17 +49,17 @@ jobs:
           python -m pip install setuptools tox tox-gh-actions
 
       - name: Install torch (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.platform == 'ubuntu-latest'
         run: |
           pip install torch==2.3.0 --index-url https://download.pytorch.org/whl/cpu
 
       - name: Install torch (macOS)
-        if: matrix.os == 'macos-latest'
+        if: matrix.platform == 'macos-latest'
         run: |
           pip install torch==2.3.0
 
       - name: Install torch (Windows)
-        if: matrix.os == 'windows-latest'
+        if: matrix.platform == 'windows-latest'
         run: |
           pip install torch==2.3.0
 
