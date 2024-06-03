@@ -48,24 +48,6 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install setuptools tox tox-gh-actions
 
-          # - name: Install torch (Linux)
-          #   if: matrix.platform == 'ubuntu-latest'
-          #   run: |
-          #     pip install torch==2.3.0 --index-url https://download.pytorch.org/whl/cpu
-
-          # - name: Install torch (macOS)
-          #   if: matrix.platform == 'macos-latest'
-          #   run: |
-          #     pip install torch==2.3.0
-
-          # - name: Install torch (Windows)
-          #   if: matrix.platform == 'windows-latest'
-          #   run: |
-          #     pip install torch==2.3.0
-
-          # - name: Verify torch installation
-          #   run: python -c "import torch; print(torch.__version__)"
-
       # this runs the platform-specific tests declared in tox.ini
       - name: Test with tox
         uses: aganders3/headless-gui@v1
@@ -76,6 +58,8 @@ jobs:
 
       - name: Coverage
         uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   deploy:
     # this will run when you have tagged a commit, starting with "v*"
