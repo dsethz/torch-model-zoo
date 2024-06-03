@@ -48,6 +48,21 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install setuptools tox tox-gh-actions
 
+      - name: Install torch (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          pip install torch==2.3.0 --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Install torch (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          pip install torch==2.3.0
+
+      - name: Install torch (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          pip install torch==2.3.0
+
       # this runs the platform-specific tests declared in tox.ini
       - name: Test with tox
         uses: aganders3/headless-gui@v1
