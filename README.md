@@ -1,12 +1,13 @@
 # torch-model-zoo
 
-[![License BSD-3](https://img.shields.io/pypi/l/torch-model-zoo.svg?color=green)](https://github.com/dsethz/torch-model-zoo/raw/main/LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/torch-model-zoo.svg?color=green)](https://pypi.org/project/torch-model-zoo)
-[![Python Version](https://img.shields.io/pypi/pyversions/torch-model-zoo.svg?color=green)](https://python.org)
+[//]: # [![License BSD-3](https://img.shields.io/pypi/l/torch-model-zoo.svg?color=green)](https://github.com/dsethz/torch-model-zoo/raw/main/LICENSE)
+[//]: # [![PyPI](https://img.shields.io/pypi/v/torch-model-zoo.svg?color=green)](https://pypi.org/project/torch-model-zoo)
+[//]: # [![Python Version](https://img.shields.io/pypi/pyversions/torch-model-zoo.svg?color=green)](https://python.org)
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![tests](https://github.com/dsethz/torch-model-zoo/workflows/tests/badge.svg)](https://github.com/dsethz/torch-model-zoo/actions)
 [![codecov](https://codecov.io/gh/dsethz/torch-model-zoo/branch/main/graph/badge.svg?token=28DKUV51EC)](https://codecov.io/gh/dsethz/torch-model-zoo)
 
-A collection of torch models including U-Net, and Visual Transformer.
+A collection of torch models including a Visual Transformer. Work in progress.
 
 ----------------------------------
 
@@ -14,13 +15,9 @@ This repository was generated with [Cookiecutter] using [@napari]'s [cookiecutte
 
 ## Installation
 
-You can install `torch-model-zoo` via [pip]:
+First [pip] install `torch=2.3.0` compatible with your system.
 
-    pip install torch-model-zoo
-
-
-
-To install latest development version :
+To install latest development version of `torch-model-zoo`:
 
     pip install git+https://github.com/dsethz/torch-model-zoo.git
 
