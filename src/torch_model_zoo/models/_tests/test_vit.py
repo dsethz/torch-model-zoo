@@ -3,6 +3,7 @@ import pytest
 import torch
 
 from torch_model_zoo.models.vit import (
+    Block,
     FeedForward,
     HeadAttention,
     MultiHeadAttention,
@@ -133,6 +134,64 @@ def test_ff():
     x_t = torch.from_numpy(x).float()
     ff = FeedForward(n_embd=c, bias=False, drop=0.2)
     out = ff(x_t)
+
+    assert isinstance(out, torch.Tensor)
+    assert out.dtype == torch.float32
+    assert out.shape == (b, n, c)
+
+
+def test_block_init():
+    with pytest.raises(AssertionError):
+        _ = Block(
+            n_embd=0.6,
+            n_heads=2,
+            bias=False,
+            scale=None,
+            drop=0.2,
+        )
+
+    with pytest.raises(AssertionError):
+        _ = Block(
+            n_embd=6,
+            n_heads=0.2,
+            bias=False,
+            scale=None,
+            drop=0.2,
+        )
+
+    with pytest.raises(AssertionError):
+        _ = Block(
+            n_embd=5,
+            n_heads=2,
+            bias=False,
+            scale=None,
+            drop=0.2,
+        )
+
+    with pytest.raises(AssertionError):
+        _ = Block(n_embd=5, n_heads=2, bias=2, scale=None, drop=0.2)
+
+    with pytest.raises(AssertionError):
+        _ = Block(n_embd=5, n_heads=2, bias=False, scale="abc", drop=0.2)
+
+    with pytest.raises(AssertionError):
+        _ = Block(
+            n_embd=5,
+            n_heads=2,
+            bias=False,
+            scale=None,
+            drop=False,
+        )
+
+
+def test_block():
+    b, n, c = 3, 10, 6  # (batch, n_tokens, n_embd)
+    n_heads = 2
+
+    x = np.random.rand(b, n, c)
+    x_t = torch.from_numpy(x).float()
+    block = Block(n_embd=c, n_heads=n_heads)
+    out = block(x_t)
 
     assert isinstance(out, torch.Tensor)
     assert out.dtype == torch.float32

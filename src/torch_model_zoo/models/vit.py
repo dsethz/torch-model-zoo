@@ -219,3 +219,87 @@ class FeedForward(nn.Module):
 
     def forward(self, x):
         return self.net(x)
+
+
+class Block(nn.Module):
+    """
+    This class defines a full Encoder block including MSA and feed forward.
+    """
+
+    def __init__(
+        self,
+        n_embd: int,
+        n_heads: int,
+        bias: bool = False,
+        scale: Optional[float] = None,
+        drop: float = 0.2,
+    ):
+        """
+        Constructor.
+
+        Parameters
+        ----------
+        n_embd: int
+            Input channels of single head.
+        n_heads: int
+            Number of attention heads.
+        bias: bool
+            True if bias should be used for linear layers of Q, K, and V.
+        scale: Optional[float]
+            Scaling factor of self-attention. If None (default) use 1/sqrt(size_head).
+        drop: float
+            Dropout rate.
+
+        Returns
+        -------
+        None
+        """
+        super().__init__()
+
+        assert isinstance(
+            n_embd, int
+        ), f"n_embd must be int, but is {type(n_embd)}."
+        assert isinstance(
+            n_heads, int
+        ), f"n_heads must be int, but is {type(n_heads)}."
+        assert isinstance(
+            bias, bool
+        ), f"bias must be bool, but is {type(bias)}."
+        assert scale is None or isinstance(
+            scale, float
+        ), f"scale must be float, but is {type(scale)}."
+        assert isinstance(
+            drop, float
+        ), f"drop must be float, but is {type(drop)}."
+        assert n_embd % n_heads == 0, "n_embd must be divisible by n_heads."
+
+        self.n_embd = n_embd
+        self.n_heads = n_heads
+        self.size_head = n_embd // n_heads
+        self.bias = bias
+        self.scale = scale
+        self.drop = drop
+
+        self.ln1 = nn.LayerNorm(n_embd)
+        self.ln2 = nn.LayerNorm(n_embd)
+
+        self.msa = MultiHeadAttention(
+            n_embd=n_embd,
+            n_heads=n_heads,
+            size_head=self.size_head,
+            bias=bias,
+            scale=scale,
+            drop=drop,
+        )
+
+        self.ff = FeedForward(
+            n_embd=n_embd,
+            bias=bias,
+            drop=drop,
+        )
+
+    def forward(self, x):
+        x = x + self.msa(self.ln1(x))
+        x = x + self.ff(self.ln2(x))
+
+        return x
