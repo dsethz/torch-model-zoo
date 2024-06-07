@@ -12,28 +12,6 @@ import numpy as np
 import torch
 
 
-def _get_prediction_token(tokens: torch.Tensor) -> torch.Tensor:
-    """
-    This function concatenates the prediction token to tokens.
-
-    Parameters
-    -----------
-    tokens: torch.Tensor
-        Tokenized image.
-
-    Returns
-    -------
-    torch.Tensor
-        Tokenized image with prediction token.
-
-    """
-    B, N, C = tokens.shape
-    prediction_token = torch.zeros(B, 1, C, device=tokens.device)
-    tokens = torch.cat([prediction_token, tokens], dim=1)
-
-    return tokens
-
-
 def _get_sinusoid_encoding(num_tokens: int, len_token: int) -> torch.Tensor:
     """
     This function generates sinusoid positional encoding.

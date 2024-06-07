@@ -6,10 +6,13 @@
 # PyTorch Version:      2.3.0                                                                                         #
 # PyTorch Lightning Version: 1.5.9                                                                                    #
 #######################################################################################################################
+
 from typing import Optional
 
 import torch
 from torch import nn
+
+from torch_model_zoo.utils.functional import _get_sinusoid_encoding
 
 
 class HeadAttention(nn.Module):
@@ -63,8 +66,6 @@ class HeadAttention(nn.Module):
             drop, float
         ), f"drop must be float, but is {type(drop)}."
 
-        self.n_embd = n_embd
-        self.size_head = size_head
         self.scale = scale if scale is not None else size_head**-0.5
 
         self.key = nn.Linear(n_embd, size_head, bias=bias)
@@ -144,9 +145,6 @@ class MultiHeadAttention(nn.Module):
         assert isinstance(
             drop, float
         ), f"drop must be float, but is {type(drop)}."
-
-        self.n_heads = n_heads
-        self.size_head = size_head
 
         self.heads = nn.ModuleList(
             [
@@ -273,12 +271,7 @@ class Block(nn.Module):
         ), f"drop must be float, but is {type(drop)}."
         assert n_embd % n_heads == 0, "n_embd must be divisible by n_heads."
 
-        self.n_embd = n_embd
-        self.n_heads = n_heads
-        self.size_head = n_embd // n_heads
-        self.bias = bias
-        self.scale = scale
-        self.drop = drop
+        size_head = n_embd // n_heads
 
         self.ln1 = nn.LayerNorm(n_embd)
         self.ln2 = nn.LayerNorm(n_embd)
@@ -286,7 +279,7 @@ class Block(nn.Module):
         self.msa = MultiHeadAttention(
             n_embd=n_embd,
             n_heads=n_heads,
-            size_head=self.size_head,
+            size_head=size_head,
             bias=bias,
             scale=scale,
             drop=drop,
@@ -303,3 +296,146 @@ class Block(nn.Module):
         x = x + self.ff(self.ln2(x))
 
         return x
+
+
+class ViT(nn.Module):
+    """
+    This class defines the full for a classification task.
+    """
+
+    def __init__(
+        self,
+        n_pred: int,
+        n_layers: int,
+        n_tokens: int,
+        n_embd: int,
+        n_heads: int,
+        bias: bool = False,
+        scale: Optional[float] = None,
+        drop: float = 0.2,
+    ):
+        """
+        Constructor.
+
+        Parameters
+        ----------
+        n_pred: int
+            Number of classes to predict.
+        n_layers: int
+            Number of encoder blocks.
+        n_tokens: int
+            Number of tokens.
+        n_embd: int
+            Length of a single token and input/output size of MSA.
+        n_heads: int
+            Number of attention heads.
+        bias: bool
+            True if bias should be used for linear layers of Q, K, and V.
+        scale: Optional[float]
+            Scaling factor of self-attention. If None (default) use 1/sqrt(size_head).
+        drop: float
+            Dropout rate.
+
+        Returns
+        -------
+        None
+        """
+        super().__init__()
+
+        assert isinstance(
+            n_pred, int
+        ), f"n_pred must be int, but is {type(n_pred)}."
+        assert isinstance(
+            n_layers, int
+        ), f"n_layers must be int, but is {type(n_layers)}."
+        assert isinstance(
+            n_tokens, int
+        ), f"n_tokens must be int, but is {type(n_tokens)}."
+        assert isinstance(
+            n_embd, int
+        ), f"n_embd must be int, but is {type(n_embd)}."
+        assert isinstance(
+            n_heads, int
+        ), f"n_heads must be int, but is {type(n_heads)}."
+        assert isinstance(
+            bias, bool
+        ), f"bias must be bool, but is {type(bias)}."
+        assert scale is None or isinstance(
+            scale, float
+        ), f"scale must be float, but is {type(scale)}."
+        assert isinstance(
+            drop, float
+        ), f"drop must be float, but is {type(drop)}."
+        assert n_embd % n_heads == 0, "n_embd must be divisible by n_heads."
+
+        self.n_tokens = n_tokens
+        self.n_embd = n_embd
+        self.n_layers = n_layers
+        self.n_heads = n_heads
+        self.bias = bias
+        self.scale = scale
+        self.drop = drop
+
+        # add positional encoding
+        self.pos_encoding = nn.Parameter(
+            _get_sinusoid_encoding(num_tokens=n_tokens + 1, len_token=n_embd),
+            requires_grad=False,
+        )
+
+        # add prediction token
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, n_embd))
+
+        # add encoder blocks
+        self.blocks = nn.Sequential(
+            *[
+                Block(
+                    n_embd=n_embd,
+                    n_heads=n_heads,
+                    bias=bias,
+                    scale=scale,
+                    drop=drop,
+                )
+                for _ in range(n_layers)
+            ]
+        )
+
+        # add classification head
+        self.ln = nn.LayerNorm(n_embd)
+        self.head = nn.Linear(n_embd, n_pred)
+
+        # initialize weights of cls_token
+        nn.init.trunc_normal_(self.cls_token, std=0.02)
+
+        # initialize remaining weights
+        self.apply(self._init_weights)
+
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            nn.init.trunc_normal_(module.weight, std=0.02)
+            if module.bias is not None:
+                nn.init.zeros_(module.bias)
+        elif isinstance(module, nn.LayerNorm):
+            nn.init.ones_(module.weight)
+            nn.init.zeros_(module.bias)
+
+    def forward_features(self, x):
+        # assume x is tokenized image of shape (B, N, C)
+        # expand cls_token to batch size
+        cls_token = self.cls_token.expand(x.shape[0], -1, -1)
+
+        # concatenate cls_token and input
+        x = torch.cat((cls_token, x), dim=1)
+
+        # add positional encoding
+        x = x + self.pos_encoding
+
+        # pass through vit
+        x = self.blocks(x)
+        x = self.ln(x)  # currently we ignore different representation sizes
+
+        return x[:, 0, :]
+
+    def forward(self, x):
+        x = self.forward_features(x)
+
+        return self.head(x)
